@@ -2,12 +2,10 @@ package blendedsoftware.covid.datacollector;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -16,7 +14,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -41,7 +38,7 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
 
             Iterator<Element> overviewNumberElements = doc.select("#maincounter-wrap > div > span").iterator();
 
-            covidData.activeCases = overviewNumberElements.next().text();
+            covidData.totalCases = overviewNumberElements.next().text();
             covidData.totalDeaths = overviewNumberElements.next().text();
             covidData.totalRecovered = overviewNumberElements.next().text();
 
@@ -93,7 +90,7 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
     }
 
     public static class CovidData {
-        public String activeCases;
+        public String totalCases;
         public String totalDeaths;
         public String totalRecovered;
         public Map<String, Country> countries = new TreeMap<>();
