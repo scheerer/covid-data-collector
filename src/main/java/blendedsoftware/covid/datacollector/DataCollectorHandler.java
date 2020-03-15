@@ -36,8 +36,10 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
         try {
             var doc = Jsoup.connect("https://www.worldometers.info/coronavirus/#countries").get();
 
-            Iterator<Element> overviewNumberElements = doc.select("#maincounter-wrap > div > span").iterator();
+            Iterator<Element> activeCasesElements = doc.select("body > div.container > div:nth-child(2) > div.col-md-8 > div > div:nth-child(14) > div > div.panel-body > div > div.panel_front > div.number-table-main").iterator();
+            covidData.activeCases = activeCasesElements.next().text();
 
+            Iterator<Element> overviewNumberElements = doc.select("#maincounter-wrap > div > span").iterator();
             covidData.totalCases = overviewNumberElements.next().text();
             covidData.totalDeaths = overviewNumberElements.next().text();
             covidData.totalRecovered = overviewNumberElements.next().text();
@@ -90,6 +92,7 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
     }
 
     public static class CovidData {
+        public String activeCases;
         public String totalCases;
         public String totalDeaths;
         public String totalRecovered;

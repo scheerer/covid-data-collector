@@ -24,7 +24,15 @@ Globals:
       Role: !Ref CodeDeployRole
 
 Resources:
-  # TODO: Add Cron Event/Trigger
+  CronEvent: #logical name of the resource
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: cron(0 */3 * * ? *) #when the event should trigger
+      Targets:
+        - Arn:
+            Fn::GetAtt: [ CovidDataCollectorFunction , "Arn" ] #reference the lambda function by its arn
+          Id:
+            Ref: CovidDataCollectorFunction #unique name of the target
   CovidDataCollectorFunction: #logical name of the resource
     Type: AWS::Lambda::Function
     Properties:
