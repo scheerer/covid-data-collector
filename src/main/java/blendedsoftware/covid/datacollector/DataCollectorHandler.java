@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -37,6 +38,13 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
         CovidData covidData = new CovidData();
         try {
             var doc = Jsoup.connect("https://www.worldometers.info/coronavirus/#countries").get();
+
+            Iterator<Element> overviewNumberElements = doc.select("#maincounter-wrap > div > span").iterator();
+
+            covidData.activeCases = overviewNumberElements.next().text();
+            covidData.totalDeaths = overviewNumberElements.next().text();
+            covidData.totalRecovered = overviewNumberElements.next().text();
+
             covidData.countries.putAll(doc
                 .select("#main_table_countries > tbody:nth-child(2) > tr")
                 .stream()
@@ -85,6 +93,9 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
     }
 
     public static class CovidData {
+        public String activeCases;
+        public String totalDeaths;
+        public String totalRecovered;
         public Map<String, Country> countries = new TreeMap<>();
 
         public static class Country {
