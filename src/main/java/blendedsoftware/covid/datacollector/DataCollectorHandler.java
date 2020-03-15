@@ -22,7 +22,16 @@ import java.util.stream.Collectors;
 public class DataCollectorHandler implements RequestHandler<Object, Object> {
 
     private static final ObjectMapper jsonMapper = new ObjectMapper();
+    private static String bucketName;
+    private static boolean s3Enabled = false;
 
+    static {
+        String s3EnabledEnvVar = System.getenv("S3_ENABLED");
+        if (s3EnabledEnvVar != null && !s3EnabledEnvVar.isBlank()) {
+            bucketName = System.getenv("BUCKET_NAME");
+            s3Enabled = Boolean.valueOf(s3EnabledEnvVar);
+        }
+    }
 
     public Object handleRequest(final Object input, final Context context) {
         CovidData covidData = new CovidData();
@@ -44,21 +53,23 @@ public class DataCollectorHandler implements RequestHandler<Object, Object> {
                     country.activeCases = rowCells.next().text();
                     return country;
                 })
-                .collect(Collectors.toMap(c -> c.name, c -> c))
+                .collect(Collectors.toMap(c -> c.name.toLowerCase(), c -> c))
             );
 
-//            String bucket = "";
-//            String key = "";
-//            String dataFile = "";
-//
-//            S3Client s3 = S3Client.builder().build();
-//            s3.putObject(
-//                PutObjectRequest.builder()
-//                    .bucket(bucket)
-//                    .key(key)
-//                    .build(),
-//                RequestBody.fromBytes(dataFile.getBytes())
-//            );
+            if (s3Enabled) {
+                String key = "covid_data.json"; // TODO: create a name based convention on runtime
+
+                // TODO: Calculate difference from yesterday - compute growth rate
+
+                S3Client s3 = S3Client.builder().build();
+                s3.putObject(
+                        PutObjectRequest.builder()
+                                .bucket(bucketName)
+                                .key(key)
+                                .build(),
+                        RequestBody.fromBytes(jsonMapper.writeValueAsBytes(covidData))
+                );
+            }
 
             return jsonMapper.writeValueAsString(covidData);
         }

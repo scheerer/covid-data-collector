@@ -32,6 +32,10 @@ Resources:
       Handler: blendedsoftware.covid.datacollector.DataCollectorHandler
       Runtime: java11
       MemorySize: 256
+      Environment:
+        Variables:
+          S3_ENABLED: true
+          BUCKET_NAME: "blendedsoftware-covid-data"
       Role:
         Fn::GetAtt: [ LambdaExecutionRole , "Arn" ] #reference the already defined role by its Arn
       Timeout: 60 #timeout for the lambda
